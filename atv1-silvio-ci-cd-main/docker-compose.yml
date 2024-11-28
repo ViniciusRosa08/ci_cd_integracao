@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+  backend:
+    image: lordluch/silvio-backend:latest
+    container_name: backend
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+  frontend:
+    image: lordluch/silvio-frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  nagios:
+    image: jasonrivers/nagios:latest
+    container_name: nagios
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nagios/etc/nagios.cfg:/usr/local/nagios/etc/nagios.cfg
+      - ./nagios/etc/objects:/usr/local/nagios/etc/objects
+    environment:
+      - NAGIOSADMIN_USER=nagiosadmin
+      - NAGIOSADMIN_PASS=nagios
+    networks:
+      - app-network
+    depends_on:
+      - frontend
+      - backend
+
+networks:
+  app-network:
+    driver: bridge
